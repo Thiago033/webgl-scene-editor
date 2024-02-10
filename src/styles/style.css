@@ -1,0 +1,80 @@
+@import url('https://webgl2fundamentals.org/webgl/resources/webgl-tutorials.css');
+
+body {
+  margin: 0;
+}
+
+#canvas {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+.screen {
+  display: flex;
+}
+
+.box {
+  width: 100px;
+  height: 100px;
+}
+
+#objectsList {
+  width: 15%;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+#engineScene {
+  display: inline-block;
+  width: 75%;
+  height: 100vh;
+  border: 5px solid black;
+}
+
+#engineSceneConfiguration {
+  width: 15%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.object {
+  width: 100%;
+  height: 200px;
+  border-bottom: 2px solid black;
+}
+
+.add-object-button {
+  width: 100%;
+  height: 40px;
+  background-color: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  border: 0;
+}
+
+.object-name-text {
+  padding-top: 10px;
+  width: 100%;
+  height: 40px;
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  font-size: medium;
+  text-align: center;
+  margin: 0;
+}
+
+#clear-scene-button, .load-folder-button, .load-scene-button, #save-scene-button{
+  background-color: gray;
+  color: black;
+  border: 3px solid black;
+  height: 70px;
+  width: 100%;
+  padding: 10px;
+  cursor: pointer;
+  position: relative;
+  font-weight: bolder;
+}

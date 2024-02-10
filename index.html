@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <!--  Meta  -->
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--  Styles  -->
+    <link rel="stylesheet" href="src/styles/style.css">
+    <link rel="stylesheet" href="src/styles/dat.gui.css">
+
+    <title>Trabalho Computacao Grafica</title>
+</head>
+
+    <body>
+        <canvas id="canvas"></canvas>
+
+        <div class="screen">
+            <div id="engineSceneConfiguration" class="box">
+                <button id="clear-scene-button">Clear Scene</button>
+                
+                <div class="load-folder-button">
+                    <label for="input">Load .OBJ Files</label>
+                    <input type="file" accept=".obj" multiple="multiple" id="input" onchange="main()">
+                </div>
+
+                <button id="save-scene-button">Save</button>
+
+                <div class="load-scene-button">
+                    <label for="input">Load Scene</label>
+                    <input type="file" id="input" onchange="loadJson()">
+                </div>
+            </div>
+            
+            <div id="engineScene" class="box"></div>
+            
+            <div id="objectsList" class="box"></div>
+        </div>
+
+        <!-- WebGL Scripts -->
+        <script src="https://webgl2fundamentals.org/webgl/resources/twgl-full.min.js"></script>
+        <script src="https://webgl2fundamentals.org/webgl/resources/m4.js"></script>
+        <script src="https://webgl2fundamentals.org/webgl/resources/flattened-primitives.js"></script>
+        <script src="https://twgljs.org/dist/4.x/twgl.min.js"></script>
+        
+        <!-- Dat GUI Scripts -->
+        <script src="src/lib/dat.gui.min.js"></script>
+        
+        <!-- Scripts -->
+        <script src="src/js/app.js"></script>
+        <script src="src/js/camera.js"></script>
+        <script src="src/js/gui.js"></script>
+        <script src="src/js/load-objects.js"></script>
+        <script src="src/js/utils.js"></script>
+        <script src="src/js/webgl.js"></script>
+
+    </body>
+
+</html>
