@@ -457,32 +457,45 @@ async function EngineScene(objectsFileNames) {
         gui = new dat.GUI();
     });
 
-    // Add an event listener to the element with the ID 'save-scene-button', executing a function when clicked
+    // Add an event listener to the 'save-scene-button' element
     document.getElementById('save-scene-button').addEventListener('click', function() {
-        // Combine objects from 'objectsList' and 'objectsInScene' arrays into a single array 'allObjects'
-        let allObjects = [...objectsList, ...objectsInScene];
+        // Combine objectsList and objectsInScene arrays into a single array called allObjects
+        const allObjects = [...objectsList, ...objectsInScene];
 
-        // Map each object in 'allObjects' to extract necessary configuration data
-        const objectConfig = allObjects.map(obj => ({
-            config: obj.config,
-            index: obj.index,
-        }));
+        // Create an empty array to store the scene data
+        const scene = [];
 
-        // Convert the object configurations to JSON format
-        const json = JSON.stringify({
-            allObjects: objectConfig
-        });
+        // Loop through each object in the allObjects array
+        for (let obj of allObjects) {
+            // Push an object containing config and index properties of each object to the scene array
+            scene.push({
+                config: obj.config,
+                index: obj.index
+            });
+        }
 
-        // Create a new link element
+        // Convert the scene array to a JSON string
+        const json = JSON.stringify({ allObjects: scene });
+
+        // Create a link element
         const link = document.createElement('a');
-        // Set the href attribute to the JSON data URI
-        link.objectReference = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
-        // Set the download attribute to specify the filename for the downloaded JSON file
-        link.download = 'download.json';
 
-        // Simulate a click event on the link to trigger the download
+        // Set the href attribute of the link to a Blob URL containing the JSON data
+        link.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+
+        // Set the download attribute of the link to 'scene.json'
+        link.download = 'scene.json';
+
+        // Append the link to the document body
+        document.body.appendChild(link);
+
+        // Simulate a click on the link to trigger the download
         link.click();
+
+        // Remove the link from the document body after download
+        document.body.removeChild(link);
     });
+
     
     // TODO:
     gl.canvas.addEventListener('mousemove', (e) => {
