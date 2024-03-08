@@ -5,4 +5,4 @@
 
 ### Instructions:
 #### To execute the program, use the following command:
-**`npx live server`**
+**`npx live-server`**
