@@ -4,10 +4,27 @@ let objectsInScene = [];
 let objectsList = [];
 let objectGeneralIndex;
 
+// Define an array to store properties of each light source
+const lights = [
+    {
+        direction: [-1, 3, 5], // Example direction for first light source
+        color: [1, 1, 1],      // Example color for first light source
+        intensity: 1           // Example intensity for first light source
+    },
+    {
+        direction: [-1, 3, 5], // Example direction for first light source
+        color: [1, 1, 1],      // Example color for first light source
+        intensity: 0.5           // Example intensity for first light source
+    },
+    // Add more light sources as needed
+];
+
+// Define ambient light color
+const ambientLight = [0.2, 0.2, 0.2]; // Example ambient light color
+
 // Set the file path for the texture image.
 // TODO: select texture name automacally
 let texturePng = 'prototypebits_texture.png';
-
 
 // TODO:
 // Get canvas
@@ -71,6 +88,22 @@ async function EngineScene(objectsFileNames) {
     for (const objectReference of objectsFileNames) {
         await loadObjectData(objectReference);
     }
+
+    // Pass ambient light color to the shader
+    gl.useProgram(meshProgramInfo.program);
+    twgl.setUniforms(meshProgramInfo, {
+        u_ambientLight: ambientLight
+    });
+
+    // Pass light properties to the shader
+    lights.forEach((light, index) => {
+        gl.useProgram(meshProgramInfo.program);
+        twgl.setUniforms(meshProgramInfo, {
+            [`u_lightDirection${index}`]: light.direction,
+            [`u_lightColor${index}`]: light.color,
+            [`u_lightIntensity${index}`]: light.intensity
+        });
+    });
 
     // Load camera configuration
     const {
@@ -248,7 +281,6 @@ async function EngineScene(objectsFileNames) {
         // Convert time to seconds
         time *= 0.001;
 
-
         // TODO:
         // ------ Figure out what pixel is under the mouse and read it
         const pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
@@ -307,6 +339,8 @@ async function EngineScene(objectsFileNames) {
             u_projection: projection,
             u_viewWorldPosition: cameraPosition,
         };
+
+        // console.log(sharedUniforms.u_lightDirection);
 
         // Use the mesh program for rendering
         gl.useProgram(meshProgramInfo.program);
@@ -402,7 +436,6 @@ async function EngineScene(objectsFileNames) {
         // Request the next animation frame for continuous rendering
         requestAnimationFrame(render);
     }
-
 
     // Define a function named normalizeColor which takes an array of color values as input
     function normalizeColor(color) {
@@ -504,11 +537,50 @@ async function EngineScene(objectsFileNames) {
         mouseX = e.clientX - rect.left;
         mouseY = e.clientY - rect.top;
     });
-     
+
+    // Create a folder in the GUI for light controls
+const lightFolder = gui.addFolder('Lights');
+
+// Loop through each light source
+lights.forEach((light, index) => {
+    // Create subfolders for each light source
+    const folder = lightFolder.addFolder(`Light ${index}`);
+
+    // Add controls for light direction (x, y, z)
+    const directionControllerX = folder.add(light.direction, '0').min(-1).max(1).step(0.1).name('X');
+    const directionControllerY = folder.add(light.direction, '1').min(-1).max(1).step(0.1).name('Y');
+    const directionControllerZ = folder.add(light.direction, '2').min(-1).max(1).step(0.1).name('Z');
+
+    // Add controls for light color (r, g, b)
+    const colorControllerR = folder.add(light.color, '0').min(0).max(1).step(0.1).name('Red');
+    const colorControllerG = folder.add(light.color, '1').min(0).max(1).step(0.1).name('Green');
+    const colorControllerB = folder.add(light.color, '2').min(0).max(1).step(0.1).name('Blue');
+
+    // Add control for light intensity
+    const intensityController = folder.add(light, 'intensity').min(0).max(100).step(0.1).name('Intensity');
+
+    // Function to update light properties in the shader
+    function updateLight() {
+        gl.useProgram(meshProgramInfo.program);
+        twgl.setUniforms(meshProgramInfo, {
+            [`u_lightDirection${index}`]: light.direction,
+            [`u_lightColor${index}`]: light.color,
+            [`u_lightIntensity${index}`]: light.intensity
+        });
+    }
+
+    // Add event listeners to update the shader uniforms when controls are adjusted
+    directionControllerX.onChange(updateLight);
+    directionControllerY.onChange(updateLight);
+    directionControllerZ.onChange(updateLight);
+    colorControllerR.onChange(updateLight);
+    colorControllerG.onChange(updateLight);
+    colorControllerB.onChange(updateLight);
+    intensityController.onChange(updateLight);
+});
 
     // TODO:
     //function loadScene(){}
-
 
     requestAnimationFrame(render);
 }

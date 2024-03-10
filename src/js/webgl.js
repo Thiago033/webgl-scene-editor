@@ -39,31 +39,60 @@ const fragmentShaderSource = `#version 300 es
     uniform vec3 specular;
     uniform float shininess;
     uniform float opacity;
-    uniform vec3 u_lightDirection;
-    uniform vec3 u_ambientLight;
+
+    // Declare uniform variables for each light source
+    uniform vec3 u_lightDirection0;
+    uniform vec3 u_lightColor0;
+    uniform float u_lightIntensity0;
+
+    uniform vec3 u_lightDirection1;
+    uniform vec3 u_lightColor1;
+    uniform float u_lightIntensity1;
 
     out vec4 outColor;
 
     void main () {
         vec3 normal = normalize(v_normal);
-      
+    
         vec3 surfaceToViewDirection = normalize(v_surfaceToView);
-        vec3 halfVector = normalize(u_lightDirection + surfaceToViewDirection);
-      
-        float fakeLight = dot(u_lightDirection, normal) * .5 + .5;
-        float specularLight = clamp(dot(normal, halfVector), 0.0, 1.0);
-      
-        vec4 diffuseMapColor = texture(diffuseMap, v_texcoord);
-        vec3 effectiveDiffuse = diffuse * diffuseMapColor.rgb * v_color.rgb;
-        float effectiveOpacity = opacity * diffuseMapColor.a * v_color.a;
-      
-        outColor = vec4(
-            emissive +
-            ambient * u_ambientLight +
-            effectiveDiffuse * fakeLight +
-            specular * pow(specularLight, shininess),
-            effectiveOpacity
-        );
+    
+        // Initialize final color
+        vec3 finalColor = emissive;
+
+        // Calculate contribution from each light source
+        vec3 lightContribution = vec3(0.0);
+        
+
+        
+        // Calculate contribution from first light source
+        vec3 lightDirection0 = normalize(u_lightDirection0);
+        float fakeLight0 = dot(lightDirection0, normal) * 0.5 + 0.5;
+        vec3 effectiveDiffuse = diffuse * texture(diffuseMap, v_texcoord).rgb * v_color.rgb;
+        float effectiveOpacity = opacity * texture(diffuseMap, v_texcoord).a * v_color.a;
+        float specularLight0 = clamp(dot(normal, normalize(lightDirection0 + surfaceToViewDirection)), 0.0, 1.0);
+        vec3 specularContribution0 = specular * pow(specularLight0, shininess);
+
+        // Combine diffuse and specular lighting for first light source
+        lightContribution += u_lightColor0 * effectiveDiffuse * fakeLight0 + specularContribution0;
+
+
+
+        // Calculate contribution from second light source
+        vec3 lightDirection1 = normalize(u_lightDirection1);
+        float fakeLight1 = dot(lightDirection1, normal) * 0.5 + 0.5;
+        float specularLight1 = clamp(dot(normal, normalize(lightDirection1 + surfaceToViewDirection)), 0.0, 1.0);
+        vec3 specularContribution1 = specular * pow(specularLight1, shininess);
+
+        // Combine diffuse and specular lighting for second light source
+        lightContribution += u_lightColor1 * effectiveDiffuse * fakeLight1 + specularContribution1;
+
+
+
+        // Sum up contributions from all light sources
+        finalColor += ambient * lightContribution + effectiveDiffuse * lightContribution + specularContribution0 + specularContribution1;
+
+        // Output final color
+        outColor = vec4(finalColor, effectiveOpacity);
     }
 `;
 

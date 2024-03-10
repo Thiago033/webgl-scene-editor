@@ -56,7 +56,7 @@ const loadGUI = (index, removeObject) => {
 
     textureFolder.addColor(object, "specular").name("Specular");
     
-    textureFolder.add(object, "shininess", 0, 1000).name("Shininess");
+    textureFolder.add(object, "shininess", 0, 100).name("Shininess");
 
     textureFolder.add(object, "opacity", 0, 1).name("Opacity");
 
