@@ -547,9 +547,9 @@ lights.forEach((light, index) => {
     const folder = lightFolder.addFolder(`Light ${index}`);
 
     // Add controls for light direction (x, y, z)
-    const directionControllerX = folder.add(light.direction, '0').min(-1).max(1).step(0.1).name('X');
-    const directionControllerY = folder.add(light.direction, '1').min(-1).max(1).step(0.1).name('Y');
-    const directionControllerZ = folder.add(light.direction, '2').min(-1).max(1).step(0.1).name('Z');
+    const directionControllerX = folder.add(light.direction, '0').min(-10).max(10).step(0.1).name('X');
+    const directionControllerY = folder.add(light.direction, '1').min(-10).max(10).step(0.1).name('Y');
+    const directionControllerZ = folder.add(light.direction, '2').min(-10).max(10).step(0.1).name('Z');
 
     // Add controls for light color (r, g, b)
     const colorControllerR = folder.add(light.color, '0').min(0).max(1).step(0.1).name('Red');
@@ -557,7 +557,7 @@ lights.forEach((light, index) => {
     const colorControllerB = folder.add(light.color, '2').min(0).max(1).step(0.1).name('Blue');
 
     // Add control for light intensity
-    const intensityController = folder.add(light, 'intensity').min(0).max(100).step(0.1).name('Intensity');
+    const intensityController = folder.add(light, 'intensity').min(0).max(1).step(0.05).name('Intensity');
 
     // Function to update light properties in the shader
     function updateLight() {
