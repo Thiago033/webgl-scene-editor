@@ -7,16 +7,15 @@ let objectGeneralIndex;
 // Define an array to store properties of each light source
 const lights = [
     {
-        direction: [-1, 3, 5], // Example direction for first light source
-        color: [1, 1, 1],      // Example color for first light source
-        intensity: 1           // Example intensity for first light source
+        direction: [-1, 3, 5],
+        color: [1, 1, 1],
+        intensity: 1
     },
     {
-        direction: [-1, 3, 5], // Example direction for first light source
-        color: [1, 1, 1],      // Example color for first light source
-        intensity: 0.5           // Example intensity for first light source
+        direction: [-1, 3, 5],
+        color: [1, 1, 1],
+        intensity: 0.5
     },
-    // Add more light sources as needed
 ];
 
 // Define ambient light color
@@ -539,45 +538,45 @@ async function EngineScene(objectsFileNames) {
     });
 
     // Create a folder in the GUI for light controls
-const lightFolder = gui.addFolder('Lights');
+    const lightFolder = gui.addFolder('Lights');
 
-// Loop through each light source
-lights.forEach((light, index) => {
-    // Create subfolders for each light source
-    const folder = lightFolder.addFolder(`Light ${index}`);
+    // Loop through each light source
+    lights.forEach((light, index) => {
+        // Create subfolders for each light source
+        const folder = lightFolder.addFolder(`Light ${index}`);
 
-    // Add controls for light direction (x, y, z)
-    const directionControllerX = folder.add(light.direction, '0').min(-10).max(10).step(0.1).name('X');
-    const directionControllerY = folder.add(light.direction, '1').min(-10).max(10).step(0.1).name('Y');
-    const directionControllerZ = folder.add(light.direction, '2').min(-10).max(10).step(0.1).name('Z');
+        // Add controls for light direction (x, y, z)
+        const directionControllerX = folder.add(light.direction, '0').min(-10).max(10).step(0.1).name('X');
+        const directionControllerY = folder.add(light.direction, '1').min(-10).max(10).step(0.1).name('Y');
+        const directionControllerZ = folder.add(light.direction, '2').min(-10).max(10).step(0.1).name('Z');
 
-    // Add controls for light color (r, g, b)
-    const colorControllerR = folder.add(light.color, '0').min(0).max(1).step(0.1).name('Red');
-    const colorControllerG = folder.add(light.color, '1').min(0).max(1).step(0.1).name('Green');
-    const colorControllerB = folder.add(light.color, '2').min(0).max(1).step(0.1).name('Blue');
+        // Add controls for light color (r, g, b)
+        const colorControllerR = folder.add(light.color, '0').min(0).max(1).step(0.1).name('Red');
+        const colorControllerG = folder.add(light.color, '1').min(0).max(1).step(0.1).name('Green');
+        const colorControllerB = folder.add(light.color, '2').min(0).max(1).step(0.1).name('Blue');
 
-    // Add control for light intensity
-    const intensityController = folder.add(light, 'intensity').min(0).max(1).step(0.05).name('Intensity');
+        // Add control for light intensity
+        const intensityController = folder.add(light, 'intensity').min(0).max(1).step(0.05).name('Intensity');
 
-    // Function to update light properties in the shader
-    function updateLight() {
-        gl.useProgram(meshProgramInfo.program);
-        twgl.setUniforms(meshProgramInfo, {
-            [`u_lightDirection${index}`]: light.direction,
-            [`u_lightColor${index}`]: light.color,
-            [`u_lightIntensity${index}`]: light.intensity
-        });
-    }
+        // Function to update light properties in the shader
+        function updateLight() {
+            gl.useProgram(meshProgramInfo.program);
+            twgl.setUniforms(meshProgramInfo, {
+                [`u_lightDirection${index}`]: light.direction,
+                [`u_lightColor${index}`]: light.color,
+                [`u_lightIntensity${index}`]: light.intensity
+            });
+        }
 
-    // Add event listeners to update the shader uniforms when controls are adjusted
-    directionControllerX.onChange(updateLight);
-    directionControllerY.onChange(updateLight);
-    directionControllerZ.onChange(updateLight);
-    colorControllerR.onChange(updateLight);
-    colorControllerG.onChange(updateLight);
-    colorControllerB.onChange(updateLight);
-    intensityController.onChange(updateLight);
-});
+        // Add event listeners to update the shader uniforms when controls are adjusted
+        directionControllerX.onChange(updateLight);
+        directionControllerY.onChange(updateLight);
+        directionControllerZ.onChange(updateLight);
+        colorControllerR.onChange(updateLight);
+        colorControllerG.onChange(updateLight);
+        colorControllerB.onChange(updateLight);
+        intensityController.onChange(updateLight);
+    });
 
     // TODO:
     //function loadScene(){}
