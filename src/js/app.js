@@ -473,7 +473,6 @@ async function EngineScene(objectsFileNames) {
         }
     };
 
-
     // Add an event listener to the element with the ID 'clear-scene-button', triggering a function when clicked
     document.getElementById('clear-scene-button').addEventListener('click', function clearScene() {
         // Clear the 'objectsInScene' array by emptying it
@@ -509,26 +508,28 @@ async function EngineScene(objectsFileNames) {
         // Convert the scene array to a JSON string
         const json = JSON.stringify({ allObjects: scene });
 
+        // Create a blob from the JSON string
+        const blob = new Blob([json], { type: 'application/json' });
+
+        // Create a temporary URL for the blob
+        const url = URL.createObjectURL(blob);
+
         // Create a link element
         const link = document.createElement('a');
 
-        // Set the href attribute of the link to a Blob URL containing the JSON data
-        link.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+        // Set the href attribute of the link to the temporary URL
+        link.href = url;
 
         // Set the download attribute of the link to 'scene.json'
         link.download = 'scene.json';
 
-        // Append the link to the document body
-        document.body.appendChild(link);
-
         // Simulate a click on the link to trigger the download
         link.click();
 
-        // Remove the link from the document body after download
-        document.body.removeChild(link);
+        // Clean up by revoking the temporary URL
+        URL.revokeObjectURL(url);
     });
 
-    
     // TODO:
     gl.canvas.addEventListener('mousemove', (e) => {
         console.log("test");
@@ -578,9 +579,6 @@ async function EngineScene(objectsFileNames) {
         intensityController.onChange(updateLight);
     });
 
-    // TODO:
-    //function loadScene(){}
-
     requestAnimationFrame(render);
 }
 
@@ -594,5 +592,83 @@ function destroyElements() {
         div.removeChild(div.firstChild);
     }
 }
+
+// Adicione um event listener para o botão de carregar cena
+document.getElementById('load-scene-button').addEventListener('click', function() {
+    // Obtenha o elemento de entrada de arquivo
+    const input = document.getElementById('load-scene-input');
+    // Ative o clique no elemento de entrada de arquivo
+    input.click();
+});
+
+// Adicione um event listener para o elemento de entrada de arquivo
+document.getElementById('load-scene-input').addEventListener('change', function(event) {
+    // Obtenha o arquivo selecionado
+    const file = event.target.files[0];
+    // Verifique se um arquivo foi selecionado
+    if (file) {
+        // Crie um objeto FileReader
+        const reader = new FileReader();
+        // Defina uma função de retorno de chamada para quando a leitura do arquivo for concluída
+        reader.onload = function(e) {
+            // Parseie o conteúdo do arquivo JSON
+            const sceneData = JSON.parse(e.target.result);
+            // Renderize a cena carregada
+            renderLoadedScene(sceneData);
+        };
+        // Leia o conteúdo do arquivo como texto
+        reader.readAsText(file);
+    }
+});
+
+// Função para renderizar a cena carregada
+function renderLoadedScene(sceneData) {
+
+    console.log(sceneData);
+
+    // Verifique se o objeto sceneData contém a chave 'allObjects'
+    if ('allObjects' in sceneData) {
+        // Limpe a cena atual
+        objectsInScene = [];
+        objectGeneralIndex = -1;
+
+        // Loop através de todos os objetos na cena carregada
+        sceneData.allObjects.forEach(objData => {
+
+            console.log(objData);
+
+            // Obtenha os dados do objeto e o índice do objeto
+            const config = objData.config;
+            const index = objData.index;
+
+            // Verifique se o índice é válido
+            if (index >= 0 && index < objectsList.length) {
+                // Copie as configurações do objeto da cena carregada para a lista de objetos na cena
+                objectsInScene.push({
+                    material: { ...objectsList[index].material },
+                    bufferInfo: objectsList[index].bufferInfo,
+                    vao: objectsList[index].vao,
+                    element: document.querySelector('#engineScene'), // Assuming '#engineScene' is the selector for the scene element
+                    config: config,
+                    index: index
+                });
+
+                // Atualize o índice geral do objeto
+                //objectGeneralIndex = Math.max(objectGeneralIndex, index);
+            } else {
+                console.error(`Invalid object index: ${index}`);
+            }
+        });
+
+        // Atualize a interface do usuário, se necessário
+        // Por exemplo, você pode querer recriar os controles da GUI para os objetos na cena carregada
+        // Você precisará implementar essa lógica conforme necessário para sua aplicação
+        //updateGUI(); // Esta função seria sua implementação para atualizar a interface do usuário
+    } else {
+        console.error('Invalid scene data: missing "allObjects" key.');
+    }
+}
+
+
 
 main();
