@@ -97,6 +97,47 @@ const fragmentShaderSource = `#version 300 es
     }
 `;
 
+const toonShaderSource = `#version 300 es
+    precision highp float;
+
+    in vec3 v_normal;
+    in vec2 v_texcoord;
+    in vec4 v_color;
+
+    uniform vec3 diffuse;
+    uniform sampler2D diffuseMap;
+    uniform float opacity;
+    uniform vec3 u_lightDirection;
+    uniform vec3 u_ambientLight;
+    uniform vec3 emissive;
+
+    out vec4 outColor;
+
+    void main () {
+        vec3 normal = normalize(v_normal);
+
+        // Calculate fake lighting (dot product between light direction and normal)
+        float fakeLight = dot(u_lightDirection, normal) * 0.5 + 0.5;
+
+        // Calculate diffuse component using texture and vertex color
+        vec4 diffuseMapColor = texture(diffuseMap, v_texcoord);
+        vec3 effectiveDiffuse = diffuse * diffuseMapColor.rgb * v_color.rgb;
+
+        // Calculate effective opacity
+        float effectiveOpacity = opacity * diffuseMapColor.a * v_color.a;
+
+        float intensity = dot(normalize(u_lightDirection), normal);
+
+        // Number of shading levels
+        float level = floor(intensity * 6.0) / 6.0; 
+
+        vec3 finalColor = mix(vec3(0.0), vec3(1.0), step(0.833, level));
+
+        // Calculate final color by combining emissive, ambient, and diffuse components
+        outColor = vec4(finalColor * (emissive + u_ambientLight * diffuse + effectiveDiffuse * fakeLight), effectiveOpacity);
+    }
+`;
+
 const initializeWorld = () => {
     const canvas = document.querySelector("#canvas");
     const gl = canvas.getContext("webgl2");
