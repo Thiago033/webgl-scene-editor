@@ -63,12 +63,12 @@ const fragmentShaderSource = `#version 300 es
         vec3 lightContribution = vec3(0.0);
         
 
+        vec3 effectiveDiffuse = diffuse * texture(diffuseMap, v_texcoord).rgb * v_color.rgb;
+        float effectiveOpacity = opacity * texture(diffuseMap, v_texcoord).a * v_color.a;
         
         // Calculate contribution from first light source
         vec3 lightDirection0 = normalize(u_lightDirection0);
         float fakeLight0 = dot(lightDirection0, normal) * 0.5 + 0.5;
-        vec3 effectiveDiffuse = diffuse * texture(diffuseMap, v_texcoord).rgb * v_color.rgb;
-        float effectiveOpacity = opacity * texture(diffuseMap, v_texcoord).a * v_color.a;
         float specularLight0 = clamp(dot(normal, normalize(lightDirection0 + surfaceToViewDirection)), 0.0, 1.0);
         vec3 specularContribution0 = specular * pow(specularLight0, shininess);
 
