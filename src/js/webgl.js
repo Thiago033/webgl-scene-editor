@@ -69,27 +69,28 @@ const fragmentShaderSource = `#version 300 es
         // Calculate contribution from first light source
         vec3 lightDirection0 = normalize(u_lightDirection0);
         float fakeLight0 = dot(lightDirection0, normal) * 0.5 + 0.5;
+        vec3 effectiveDiffuse0 = u_lightColor0 * diffuse * texture(diffuseMap, v_texcoord).rgb * v_color.rgb * u_lightIntensity0;
+        float effectiveOpacity0 = opacity * texture(diffuseMap, v_texcoord).a * v_color.a;
         float specularLight0 = clamp(dot(normal, normalize(lightDirection0 + surfaceToViewDirection)), 0.0, 1.0);
         vec3 specularContribution0 = specular * pow(specularLight0, shininess);
-
+        
         // Combine diffuse and specular lighting for first light source
-        lightContribution += u_lightColor0 * effectiveDiffuse * fakeLight0 + specularContribution0;
-
-
-
+        lightContribution += effectiveDiffuse0 * fakeLight0 + specularContribution0;
+        
         // Calculate contribution from second light source
         vec3 lightDirection1 = normalize(u_lightDirection1);
         float fakeLight1 = dot(lightDirection1, normal) * 0.5 + 0.5;
+        vec3 effectiveDiffuse1 = u_lightColor1 * diffuse * texture(diffuseMap, v_texcoord).rgb * v_color.rgb * u_lightIntensity1;
+        float effectiveOpacity1 = opacity * texture(diffuseMap, v_texcoord).a * v_color.a;
         float specularLight1 = clamp(dot(normal, normalize(lightDirection1 + surfaceToViewDirection)), 0.0, 1.0);
         vec3 specularContribution1 = specular * pow(specularLight1, shininess);
-
+        
         // Combine diffuse and specular lighting for second light source
-        lightContribution += u_lightColor1 * effectiveDiffuse * fakeLight1 + specularContribution1;
-
-
-
+        lightContribution += effectiveDiffuse1 * fakeLight1 + specularContribution1;
+        
         // Sum up contributions from all light sources
-        finalColor += ambient * lightContribution + effectiveDiffuse * lightContribution + specularContribution0 + specularContribution1;
+        finalColor += ambient * lightContribution + effectiveDiffuse0 + effectiveDiffuse1 + specularContribution0 + specularContribution1;
+        
 
         // Output final color
         outColor = vec4(finalColor, effectiveOpacity);
