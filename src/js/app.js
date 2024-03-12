@@ -4,22 +4,18 @@ let objectsInScene = [];
 let objectsList = [];
 let objectGeneralIndex;
 
-// Define an array to store properties of each light source
-const lights = [
-    {
-        direction: [-1, 3, 5],
-        color: [1, 1, 1],
-        intensity: 1
-    },
-    {
-        direction: [-1, 3, 5],
-        color: [1, 1, 1],
-        intensity: 0.5
-    },
-];
+let toonFragmentShader = 0;
 
-// Define ambient light color
-const ambientLight = [0.2, 0.2, 0.2]; // Example ambient light color
+let lights = []
+let LightsCounter = 1;
+
+const firstLight = {
+    positionX: -1.0,
+    positionY: 3.0,
+    positionZ: 5.0,
+    intensity: 1.0,
+    color: [255, 255, 255],
+}
 
 // Set the file path for the texture image.
 // TODO: select texture name automacally
@@ -28,7 +24,6 @@ let texturePng = 'prototypebits_texture.png';
 // TODO:
 // Get canvas
 const canvas = document.getElementById("engineScene");
-
 
 // Create a new dat.GUI instance for graphical user interface controls.
 gui = new dat.GUI();
@@ -87,22 +82,6 @@ async function EngineScene(objectsFileNames) {
     for (const objectReference of objectsFileNames) {
         await loadObjectData(objectReference);
     }
-
-    // Pass ambient light color to the shader
-    gl.useProgram(meshProgramInfo.program);
-    twgl.setUniforms(meshProgramInfo, {
-        u_ambientLight: ambientLight
-    });
-
-    // Pass light properties to the shader
-    lights.forEach((light, index) => {
-        gl.useProgram(meshProgramInfo.program);
-        twgl.setUniforms(meshProgramInfo, {
-            [`u_lightDirection${index}`]: light.direction,
-            [`u_lightColor${index}`]: light.color,
-            [`u_lightIntensity${index}`]: light.intensity
-        });
-    });
 
     // Load camera configuration
     const {
@@ -275,6 +254,11 @@ async function EngineScene(objectsFileNames) {
     let oldPickColor;
     let frameCount = 0;
 
+
+    lights.push(firstLight);
+    updateLightGUI(LightsCounter);
+
+
     // Define a function named render which takes 'time' as input
     function render(time) {
         // Convert time to seconds
@@ -331,9 +315,29 @@ async function EngineScene(objectsFileNames) {
         const camera = m4.lookAt(cameraPosition, cameraTarget, up);
         const view = m4.inverse(camera);
 
+
+        let positions = [];
+        let intensitys = [];
+        let colors = [];
+
+        lights.map(light => {
+            positions.push(light.positionX, light.positionY, light.positionZ);
+            intensitys.push(light.intensity);
+            colors.push(light.color[0]/255, light.color[1]/255, light.color[2]/255);
+        });
+
         // Define shared uniforms for lighting and view/projection matrices
         const sharedUniforms = {
-            u_lightDirection: m4.normalize([-1, 3, 5]),
+            u_ambientLight: [0.1, 0.1, 0.1],
+
+            u_lights_counter: LightsCounter,
+
+            u_light_pos: positions,
+            u_light_intensity: intensitys,
+            u_light_color: colors, 
+            
+            u_toon_shader: toonFragmentShader,
+
             u_view: view,
             u_projection: projection,
             u_viewWorldPosition: cameraPosition,
@@ -538,46 +542,58 @@ async function EngineScene(objectsFileNames) {
         mouseY = e.clientY - rect.top;
     });
 
-    // Create a folder in the GUI for light controls
-    const lightFolder = gui.addFolder('Lights');
+    // Add an event listener to the 'add-toon-shadding-button' element
+    document.getElementById('add-toon-shadding-button').addEventListener('click', function(){
+        if (!toonFragmentShader){
+          toonFragmentShader = 1;
 
-    // Loop through each light source
-    lights.forEach((light, index) => {
-        // Create subfolders for each light source
-        const folder = lightFolder.addFolder(`Light ${index}`);
-
-        // Add controls for light direction (x, y, z)
-        const directionControllerX = folder.add(light.direction, '0').min(-10).max(10).step(0.1).name('X');
-        const directionControllerY = folder.add(light.direction, '1').min(-10).max(10).step(0.1).name('Y');
-        const directionControllerZ = folder.add(light.direction, '2').min(-10).max(10).step(0.1).name('Z');
-
-        // Add controls for light color (r, g, b)
-        const colorControllerR = folder.add(light.color, '0').min(0).max(1).step(0.1).name('Red');
-        const colorControllerG = folder.add(light.color, '1').min(0).max(1).step(0.1).name('Green');
-        const colorControllerB = folder.add(light.color, '2').min(0).max(1).step(0.1).name('Blue');
-
-        // Add control for light intensity
-        const intensityController = folder.add(light, 'intensity').min(0).max(1).step(0.05).name('Intensity');
-
-        // Function to update light properties in the shader
-        function updateLight() {
-            gl.useProgram(meshProgramInfo.program);
-            twgl.setUniforms(meshProgramInfo, {
-                [`u_lightDirection${index}`]: light.direction,
-                [`u_lightColor${index}`]: light.color,
-                [`u_lightIntensity${index}`]: light.intensity
-            });
+          // Change button text to indicate disabling
+          this.innerText = "Disable Toon Shading";
         }
+        else {
+          toonFragmentShader = 0;
 
-        // Add event listeners to update the shader uniforms when controls are adjusted
-        directionControllerX.onChange(updateLight);
-        directionControllerY.onChange(updateLight);
-        directionControllerZ.onChange(updateLight);
-        colorControllerR.onChange(updateLight);
-        colorControllerG.onChange(updateLight);
-        colorControllerB.onChange(updateLight);
-        intensityController.onChange(updateLight);
+          // Change button text to indicate enabling
+          this.innerText = "Enable Toon Shading";
+        }
     });
+
+    // Add an event listener to the 'add-light-button' element
+    document.getElementById('add-light-button').addEventListener('click', function(){
+        if (LightsCounter < 5){
+
+            const light = {
+                positionX: -1.0,
+                positionY: 3.0,
+                positionZ: 5.0,
+                intensity: 1.0,
+                color: [255, 0, 0],
+            }
+            
+            lights.push(light);
+            
+            LightsCounter++;
+            updateLightGUI(LightsCounter);
+        } else {
+            console.log("Max light number is 5(five)");
+        }
+    });
+
+    // Function to update the GUI with light controls
+    function updateLightGUI(lightIndex) {
+        // Create a new GUI instance for each light
+        const guiLightsFolder = new dat.GUI();
+
+        //Add a new folder in the GUI for light
+        const lightFolder = guiLightsFolder.addFolder(`Light ${lightIndex}`);
+
+        // Add controls for specific light properties
+        lightFolder.add(lights[lightIndex - 1], 'positionX', -20, 20).name('X');
+        lightFolder.add(lights[lightIndex - 1], 'positionY', -20, 20).name('Y');
+        lightFolder.add(lights[lightIndex - 1], 'positionZ', -20, 20).name('Z');
+        lightFolder.add(lights[lightIndex - 1], 'intensity', 0, 5).name('Intensity');
+        lightFolder.addColor(lights[lightIndex - 1], 'color').name('Color');
+    }
 
     requestAnimationFrame(render);
 }
@@ -668,7 +684,5 @@ function renderLoadedScene(sceneData) {
         console.error('Invalid scene data: missing "allObjects" key.');
     }
 }
-
-
 
 main();
