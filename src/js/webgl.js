@@ -90,28 +90,23 @@ const fragmentShaderSource = `#version 300 es
 
     for (int i = 0; i < u_lights_counter; i++) { 
         vec3 lightDirection = normalize(v_light_pos[i]);
+        
         float diffuseFactor = max(dot(normal, lightDirection), 0.0);
+
         finalColor += diffuse * step * diffuseFactor * u_light_intensity[i];
         
-        vec3 halfVector = normalize(lightDirection + surfaceToViewDirection);
-        float specularFactor = pow(max(dot(normal, halfVector), 0.0), shininess * 0.3);
+        vec3 worldVector = normalize(lightDirection + surfaceToViewDirection);
+
+        float specularFactor = pow(max(dot(normal, worldVector), 0.0), shininess * 0.3);
+
         specularColor += specular * specularFactor * u_light_intensity[i] * u_light_color[i];
     }
 
-    ambientColor += u_ambientLight;
- 
-    finalColor += ambientColor * ambient;
-
-    vec4 diffuseMapColor = texture(diffuseMap, v_texcoord);
-    finalColor *= diffuseMapColor.rgb;
-
-    float finalOpacity = opacity * diffuseMapColor.a;
-
+    finalColor += (u_ambientLight + ambient) * texture(diffuseMap, v_texcoord).rgb;
+    float finalOpacity = opacity * texture(diffuseMap, v_texcoord).a;
     finalColor += specularColor;
-
-    finalColor /= float(u_lights_counter);
-
-    outColor = vec4(finalColor, finalOpacity);
+    outColor = vec4(finalColor / float(u_lights_counter), finalOpacity);
+    
   }
 `;
 
