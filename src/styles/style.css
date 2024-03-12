@@ -67,10 +67,10 @@ body {
   margin: 0;
 }
 
-#clear-scene-button, .load-folder-button, .load-scene-button, #save-scene-button{
+#clear-scene-button, #save-scene-button, #add-light-button, #add-toon-shadding-button, .load-folder-button, .load-scene-button {
   background-color: gray;
   color: black;
-  border: 3px solid black;
+  border: 3px solid rgb(0, 0, 0);
   height: 70px;
   width: 100%;
   padding: 10px;
