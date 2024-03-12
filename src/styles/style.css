@@ -67,7 +67,7 @@ body {
   margin: 0;
 }
 
-#clear-scene-button, #save-scene-button, #add-light-button, #add-toon-shadding-button, .load-folder-button, .load-scene-button {
+#clear-scene-button, #save-scene-button, #add-light-button, #remove-light-button, #add-toon-shadding-button, .load-folder-button, .load-scene-button {
   background-color: gray;
   color: black;
   border: 3px solid rgb(0, 0, 0);

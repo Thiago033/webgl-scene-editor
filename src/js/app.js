@@ -579,6 +579,31 @@ async function EngineScene(objectsFileNames) {
         }
     });
 
+    document.getElementById('remove-light-button').addEventListener('click', function(){
+            // Verifique se há luzes para remover
+    if (LightsCounter > 0) {
+        // Remova a última luz do array 'lights'
+        lights.pop();
+        
+        // Atualize o contador de luzes
+        LightsCounter--;
+
+        // Remova o controle da GUI da última luz
+        gui.__controllers.forEach((controller, index) => {
+            if (controller.property === `Light ${LightsCounter}`) {
+                gui.__controllers.splice(index, 1);
+                gui.updateDisplay();
+            }
+        });
+
+        // Atualize a renderização da cena
+        // Aqui você pode chamar a função que renderiza a cena novamente para atualizar a visualização após remover a luz
+        // render();
+    } else {
+        console.log("Não há luzes para remover.");
+    }
+    });
+
     // Function to update the GUI with light controls
     function updateLightGUI(lightIndex) {
         // Create a new GUI instance for each light
